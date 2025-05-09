@@ -1,0 +1,851 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>NUMIDIA - Menu</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        numidia: {
+                            gold: '#FFD700',
+                            black: '#121212',
+                        }
+                    },
+                }
+            },
+            darkMode: 'class',
+        }
+    </script>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Poppins:wght@400;600;700&display=swap');
+        
+        body {
+            font-family: 'Poppins', sans-serif;
+            background-color: #0e0e0e;
+            color: #FFD700;
+            overflow-x: hidden;
+            position: relative;
+            min-height: 100vh;
+        }
+        
+        /* Galerie avec 3 cartes visibles */
+        .card-container {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            width: 100%;
+            height: 100%;
+            padding: 0 15px;
+            position: relative;
+            perspective: 1000px;
+        }
+        
+        .card {
+            position: absolute;
+            left: 50%;
+            transition: all 0.6s cubic-bezier(0.23, 1, 0.32, 1);
+            border-radius: 15px;
+            overflow: hidden;
+            box-shadow: 0 0 30px rgba(255, 215, 0, 0.2);
+            cursor: pointer;
+            will-change: transform, opacity;
+            backface-visibility: hidden;
+        }
+        
+        .card.active {
+            transform: translateX(-50%) scale(1.1);
+            z-index: 20;
+            box-shadow: 0 0 40px rgba(255, 215, 0, 0.4);
+            opacity: 1;
+            filter: brightness(1);
+        }
+        
+        .card.prev {
+            transform: translateX(calc(-50% - 180px)) scale(0.9);
+            z-index: 10;
+            opacity: 0.7;
+            filter: brightness(0.8);
+        }
+        
+        .card.next {
+            transform: translateX(calc(-50% + 180px)) scale(0.9);
+            z-index: 10;
+            opacity: 0.7;
+            filter: brightness(0.8);
+        }
+        
+        .card.hidden {
+            opacity: 0;
+            transform: translateX(-50%) scale(0.8);
+            pointer-events: none;
+        }
+        
+        .card img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+            transition: all 0.5s ease;
+        }
+        
+        .card:hover {
+            box-shadow: 0 0 50px rgba(255, 215, 0, 0.5);
+        }
+        
+        .card.active:hover {
+            transform: translateX(-50%) scale(1.12);
+        }
+        
+        .nav-button {
+            position: absolute;
+            top: 50%;
+            transform: translateY(-50%);
+            width: 60px;
+            height: 60px;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            background-color: rgba(255, 215, 0, 0.3);
+            border-radius: 50%;
+            cursor: pointer;
+            color: #FFD700;
+            font-size: 24px;
+            transition: all 0.3s ease;
+            z-index: 25;
+            border: 1px solid rgba(255, 215, 0, 0.5);
+            backdrop-filter: blur(5px);
+        }
+        
+        .nav-button:hover {
+            background-color: rgba(255, 215, 0, 0.5);
+            transform: translateY(-50%) scale(1.1);
+        }
+        
+        .nav-button.prev {
+            left: 20px;
+        }
+        
+        .nav-button.next {
+            right: 20px;
+        }
+        
+        .dot-indicator {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            gap: 10px;
+            margin-top: 20px;
+        }
+        
+        .dot {
+            width: 10px;
+            height: 10px;
+            border-radius: 50%;
+            background-color: rgba(255, 215, 0, 0.3);
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+        
+        .dot.active {
+            background-color: #FFD700;
+            transform: scale(1.2);
+        }
+        
+        .dot:hover {
+            background-color: rgba(255, 215, 0, 0.6);
+            transform: scale(1.1);
+        }
+        
+        /* Header */
+        .header {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            padding: 15px 25px;
+            border-bottom: 1px solid rgba(255, 215, 0, 0.2);
+            backdrop-filter: blur(5px);
+            position: relative;
+            z-index: 30;
+        }
+        
+        .logo-container {
+            display: flex;
+            align-items: center;
+            gap: 15px;
+        }
+        
+        .counter {
+            font-size: 18px;
+            color: #FFD700;
+            text-align: center;
+            margin-top: 15px;
+            font-weight: 600;
+            text-shadow: 0 0 10px rgba(255, 215, 0, 0.3);
+        }
+        
+        /* Lightbox */
+        .lightbox {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0, 0, 0, 0.95);
+            z-index: 100;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            opacity: 0;
+            visibility: hidden;
+            transition: all 0.4s cubic-bezier(0.23, 1, 0.32, 1);
+            backdrop-filter: blur(5px);
+        }
+        
+        .lightbox.visible {
+            opacity: 1;
+            visibility: visible;
+        }
+        
+        .lightbox-content {
+            position: relative;
+            width: 90%;
+            height: 90%;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            transform: scale(0.9);
+            opacity: 0;
+            transition: all 0.5s cubic-bezier(0.23, 1, 0.32, 1);
+        }
+        
+        .lightbox.visible .lightbox-content {
+            transform: scale(1);
+            opacity: 1;
+        }
+        
+        .lightbox-img {
+            max-width: 100%;
+            max-height: 100%;
+            object-fit: contain;
+            box-shadow: 0 0 50px rgba(0, 0, 0, 0.5);
+            border-radius: 10px;
+            transform: scale(0.95);
+            transition: all 0.5s cubic-bezier(0.23, 1, 0.32, 1);
+        }
+        
+        .lightbox.visible .lightbox-img {
+            transform: scale(1);
+        }
+        
+        .close-btn {
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            width: 50px;
+            height: 50px;
+            background-color: rgba(255, 215, 0, 0.3);
+            border-radius: 50%;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            cursor: pointer;
+            color: #FFD700;
+            font-size: 24px;
+            z-index: 101;
+            transition: all 0.3s cubic-bezier(0.23, 1, 0.32, 1);
+            border: 1px solid rgba(255, 215, 0, 0.5);
+            transform: scale(0);
+            opacity: 0;
+        }
+        
+        .lightbox.visible .close-btn {
+            transform: scale(1);
+            opacity: 1;
+            transition-delay: 0.2s;
+        }
+        
+        .close-btn:hover {
+            background-color: rgba(255, 215, 0, 0.5);
+            transform: scale(1.1) rotate(90deg);
+        }
+        
+        .lightbox-nav {
+            position: absolute;
+            top: 50%;
+            transform: translateY(-50%) scale(0);
+            width: 60px;
+            height: 60px;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            background-color: rgba(255, 215, 0, 0.3);
+            border-radius: 50%;
+            cursor: pointer;
+            color: #FFD700;
+            font-size: 24px;
+            z-index: 101;
+            transition: all 0.3s cubic-bezier(0.23, 1, 0.32, 1);
+            border: 1px solid rgba(255, 215, 0, 0.5);
+            opacity: 0;
+        }
+        
+        .lightbox.visible .lightbox-nav {
+            transform: translateY(-50%) scale(1);
+            opacity: 1;
+            transition-delay: 0.3s;
+        }
+        
+        .lightbox-nav:hover {
+            background-color: rgba(255, 215, 0, 0.5);
+            transform: translateY(-50%) scale(1.1);
+        }
+        
+        .lightbox-nav.prev {
+            left: 20px;
+        }
+        
+        .lightbox-nav.next {
+            right: 20px;
+        }
+        
+        /* CSS pour adaptation aux écrans mobiles */
+        @media (max-width: 768px) {
+            .header {
+                flex-direction: column;
+                gap: 15px;
+                padding: 10px 15px;
+            }
+            
+            .logo-container {
+                justify-content: center;
+            }
+            
+            .card {
+                width: 250px !important;
+            }
+            
+            .card.active {
+                transform: translateX(-50%) scale(1);
+            }
+            
+            .card.prev {
+                transform: translateX(calc(-50% - 120px)) scale(0.8);
+                opacity: 0.5;
+            }
+            
+            .card.next {
+                transform: translateX(calc(-50% + 120px)) scale(0.8);
+                opacity: 0.5;
+            }
+            
+            .nav-button {
+                width: 45px;
+                height: 45px;
+            }
+            
+            .nav-button.prev {
+                left: 5px;
+            }
+            
+            .nav-button.next {
+                right: 5px;
+            }
+            
+            .lightbox-nav {
+                width: 40px;
+                height: 40px;
+            }
+            
+            .close-btn {
+                width: 40px;
+                height: 40px;
+                top: 10px;
+                right: 10px;
+            }
+            
+            .lightbox-img {
+                max-width: 95%;
+                max-height: 80%;
+            }
+        }
+        
+        /* Pour les très petits écrans */
+        @media (max-width: 480px) {
+            .card.prev, .card.next {
+                opacity: 0.3;
+            }
+            
+            .card {
+                width: 220px !important;
+            }
+            
+            .card.prev {
+                transform: translateX(calc(-50% - 80px)) scale(0.7);
+            }
+            
+            .card.next {
+                transform: translateX(calc(-50% + 80px)) scale(0.7);
+            }
+            
+            .nav-button {
+                width: 40px;
+                height: 40px;
+            }
+            
+            .nav-button svg {
+                width: 20px;
+                height: 20px;
+            }
+            
+            .counter {
+                font-size: 16px;
+            }
+        }
+        
+        /* Animation de chargement */
+        .loading-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-color: #0e0e0e;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            z-index: 1000;
+            transition: opacity 0.5s ease, visibility 0.5s ease;
+        }
+        
+        .loading-spinner {
+            width: 50px;
+            height: 50px;
+            border: 3px solid rgba(255, 215, 0, 0.3);
+            border-radius: 50%;
+            border-top-color: #FFD700;
+            animation: spin 1s ease-in-out infinite;
+        }
+        
+        @keyframes spin {
+            to { transform: rotate(360deg); }
+        }
+        
+        .loading-overlay.hidden {
+            opacity: 0;
+            visibility: hidden;
+        }
+    </style>
+</head>
+<body>
+    <!-- Animation de chargement -->
+    <div class="loading-overlay" id="loading-overlay">
+        <div class="loading-spinner"></div>
+    </div>
+    
+    <!-- Header avec Logo -->
+    <div class="header">
+        <div class="logo-container">
+            <img src="https://pfst.cf2.poecdn.net/base/image/58f36384d3793d649c024efed3082be86d2e25e77e8eac46056dc851ace495bc?w=800&h=800" alt="NUMIDIA Logo" class="w-12 h-12">
+            <h1 class="text-3xl md:text-4xl font-bold text-numidia-gold">NUMIDIA</h1>
+        </div>
+    </div>
+    
+    <!-- Indicateurs de points -->
+    <div class="dot-indicator" id="dot-indicator">
+        <!-- Dots will be added dynamically -->
+    </div>
+    
+    <!-- Conteneur principal pour les cartes -->
+    <div class="flex-1 flex items-center justify-center h-[65vh] py-8">
+        <div class="relative w-full max-w-6xl mx-auto">
+            <!-- Boutons de navigation -->
+            <div class="nav-button prev" id="prev-btn">
+                <svg xmlns="http://www.w3.org/2000/svg" class="h-8 w-8" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7" />
+                </svg>
+            </div>
+            
+            <div class="nav-button next" id="next-btn">
+                <svg xmlns="http://www.w3.org/2000/svg" class="h-8 w-8" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7" />
+                </svg>
+            </div>
+            
+            <!-- Conteneur de cartes -->
+            <div class="card-container" id="card-container">
+                <!-- Cards will be added dynamically -->
+            </div>
+        </div>
+    </div>
+    
+    <!-- Compteur -->
+    <div class="counter" id="counter">
+        1 / 3
+    </div>
+    
+    <!-- Lightbox -->
+    <div class="lightbox" id="lightbox">
+        <div class="close-btn" id="close-lightbox">
+            <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                <path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12" />
+            </svg>
+        </div>
+        
+        <div class="lightbox-content">
+            <img id="lightbox-img" class="lightbox-img" src="/placeholder.svg" alt="Image agrandie">
+            
+            <div class="lightbox-nav prev" id="lightbox-prev">
+                <svg xmlns="http://www.w3.org/2000/svg" class="h-8 w-8" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7" />
+                </svg>
+            </div>
+            
+            <div class="lightbox-nav next" id="lightbox-next">
+                <svg xmlns="http://www.w3.org/2000/svg" class="h-8 w-8" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7" />
+                </svg>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            // Animation de chargement
+            const loadingOverlay = document.getElementById('loading-overlay');
+            
+            // Préchargement des images
+            function preloadImages(urls, callback) {
+                let loadedCount = 0;
+                const toLoad = urls.length;
+                
+                urls.forEach(url => {
+                    const img = new Image();
+                    img.onload = img.onerror = () => {
+                        loadedCount++;
+                        if (loadedCount === toLoad) {
+                            callback();
+                        }
+                    };
+                    img.src = url;
+                });
+            }
+            
+            // Configuration
+            const images = [
+                {
+                    url: "https://pfst.cf2.poecdn.net/base/image/ec25c86bd5160297cd43e47eccc69a6571336455672e1b4ef082519329e61122?w=2480&h=3508",
+                    alt: "NUMIDIA Burger Menu"
+                },
+                {
+                    url: "https://pfst.cf2.poecdn.net/base/image/4be323936af6dc23a9a0159f3260dbb070047546c4f29f6318fed4378898c6db?w=2480&h=3508",
+                    alt: "NUMIDIA Coffee Menu"
+                },
+                {
+                    url: "https://pfst.cf2.poecdn.net/base/image/e039422950008e49143bf6160a45bd7fe6f75f51581586b75f8260a4c16e5d8b?w=2480&h=3508",
+                    alt: "NUMIDIA Croquettes Menu"
+                }
+            ];
+            
+            // Précharger les images
+            preloadImages(images.map(img => img.url), () => {
+                // Masquer l'animation de chargement
+                loadingOverlay.classList.add('hidden');
+                
+                // Initialiser la galerie
+                initGallery();
+            });
+            
+            function initGallery() {
+                // Éléments DOM
+                const cardContainer = document.getElementById('card-container');
+                const dotIndicator = document.getElementById('dot-indicator');
+                const counter = document.getElementById('counter');
+                const prevBtn = document.getElementById('prev-btn');
+                const nextBtn = document.getElementById('next-btn');
+                const lightbox = document.getElementById('lightbox');
+                const lightboxImg = document.getElementById('lightbox-img');
+                const closeLightbox = document.getElementById('close-lightbox');
+                const lightboxPrev = document.getElementById('lightbox-prev');
+                const lightboxNext = document.getElementById('lightbox-next');
+                
+                let currentIndex = 1; // On commence par le café (au milieu)
+                let isAnimating = false; // Pour éviter les clics multiples pendant l'animation
+                
+                // Créer les cartes
+                function createCards() {
+                    cardContainer.innerHTML = '';
+                    
+                    images.forEach((image, index) => {
+                        const card = document.createElement('div');
+                        card.className = `card ${getCardClass(index)}`;
+                        card.style.width = '300px';
+                        card.style.zIndex = index === currentIndex ? 10 : 5;
+                        
+                        const img = document.createElement('img');
+                        img.src = image.url;
+                        img.alt = image.alt;
+                        img.className = 'w-full h-full object-cover';
+                        
+                        card.appendChild(img);
+                        card.addEventListener('click', () => {
+                            if (isAnimating) return;
+                            
+                            if (index === currentIndex) {
+                                openLightbox(index);
+                            } else {
+                                goToIndex(index);
+                            }
+                        });
+                        
+                        cardContainer.appendChild(card);
+                    });
+                    
+                    updateCounter();
+                }
+                
+                // Créer les points indicateurs
+                function createDots() {
+                    dotIndicator.innerHTML = '';
+                    
+                    images.forEach((_, index) => {
+                        const dot = document.createElement('div');
+                        dot.className = `dot ${index === currentIndex ? 'active' : ''}`;
+                        dot.addEventListener('click', () => {
+                            if (isAnimating) return;
+                            goToIndex(index);
+                        });
+                        
+                        dotIndicator.appendChild(dot);
+                    });
+                }
+                
+                // Déterminer la classe de la carte en fonction de sa position
+                function getCardClass(index) {
+                    if (index === currentIndex) return 'active';
+                    if (index === getPrevIndex()) return 'prev';
+                    if (index === getNextIndex()) return 'next';
+                    return 'hidden';
+                }
+                
+                // Obtenir l'index précédent
+                function getPrevIndex() {
+                    return (currentIndex - 1 + images.length) % images.length;
+                }
+                
+                // Obtenir l'index suivant
+                function getNextIndex() {
+                    return (currentIndex + 1) % images.length;
+                }
+                
+                // Aller à un index spécifique
+                function goToIndex(index) {
+                    if (index === currentIndex || isAnimating) return;
+                    
+                    isAnimating = true;
+                    currentIndex = index;
+                    updateCards();
+                    updateDots();
+                    updateCounter();
+                    
+                    // Réactiver les clics après l'animation
+                    setTimeout(() => {
+                        isAnimating = false;
+                    }, 600); // Correspond à la durée de transition CSS
+                }
+                
+                // Mettre à jour les classes des cartes
+                function updateCards() {
+                    const cards = document.querySelectorAll('.card');
+                    
+                    cards.forEach((card, index) => {
+                        card.className = `card ${getCardClass(index)}`;
+                        card.style.zIndex = index === currentIndex ? 10 : 5;
+                    });
+                }
+                
+                // Mettre à jour les points
+                function updateDots() {
+                    const dots = document.querySelectorAll('.dot');
+                    
+                    dots.forEach((dot, index) => {
+                        dot.className = `dot ${index === currentIndex ? 'active' : ''}`;
+                    });
+                }
+                
+                // Mettre à jour le compteur
+                function updateCounter() {
+                    counter.textContent = `${currentIndex + 1} / ${images.length}`;
+                }
+                
+                // Ouvrir la lightbox
+                function openLightbox(index) {
+                    currentIndex = index;
+                    lightboxImg.src = images[currentIndex].url;
+                    lightbox.classList.add('visible');
+                    document.body.style.overflow = 'hidden'; // Empêcher le défilement
+                }
+                
+                // Fermer la lightbox
+                function closeLightboxFunc() {
+                    lightbox.classList.remove('visible');
+                    
+                    // Attendre la fin de l'animation avant de réactiver le défilement
+                    setTimeout(() => {
+                        document.body.style.overflow = ''; // Restaurer le défilement
+                    }, 400);
+                }
+                
+                // Initialiser
+                function init() {
+                    createCards();
+                    createDots();
+                    
+                    // Gestionnaires d'événements
+                    prevBtn.addEventListener('click', () => {
+                        if (isAnimating) return;
+                        goToIndex(getPrevIndex());
+                    });
+                    
+                    nextBtn.addEventListener('click', () => {
+                        if (isAnimating) return;
+                        goToIndex(getNextIndex());
+                    });
+                    
+                    closeLightbox.addEventListener('click', closeLightboxFunc);
+                    
+                    lightboxPrev.addEventListener('click', () => {
+                        currentIndex = getPrevIndex();
+                        
+                        // Ajouter une classe pour l'animation de transition
+                        lightboxImg.style.opacity = '0';
+                        lightboxImg.style.transform = 'scale(0.95) translateX(-20px)';
+                        
+                        setTimeout(() => {
+                            lightboxImg.src = images[currentIndex].url;
+                            
+                            // Réinitialiser après le changement d'image
+                            setTimeout(() => {
+                                lightboxImg.style.opacity = '1';
+                                lightboxImg.style.transform = 'scale(1) translateX(0)';
+                            }, 50);
+                        }, 200);
+                    });
+                    
+                    lightboxNext.addEventListener('click', () => {
+                        currentIndex = getNextIndex();
+                        
+                        // Ajouter une classe pour l'animation de transition
+                        lightboxImg.style.opacity = '0';
+                        lightboxImg.style.transform = 'scale(0.95) translateX(20px)';
+                        
+                        setTimeout(() => {
+                            lightboxImg.src = images[currentIndex].url;
+                            
+                            // Réinitialiser après le changement d'image
+                            setTimeout(() => {
+                                lightboxImg.style.opacity = '1';
+                                lightboxImg.style.transform = 'scale(1) translateX(0)';
+                            }, 50);
+                        }, 200);
+                    });
+                    
+                    // Fermer la lightbox en cliquant à l'extérieur
+                    lightbox.addEventListener('click', (e) => {
+                        if (e.target === lightbox) {
+                            closeLightboxFunc();
+                        }
+                    });
+                    
+                    // Navigation clavier
+                    document.addEventListener('keydown', (e) => {
+                        if (!lightbox.classList.contains('visible')) {
+                            // Navigation galerie principale
+                            if (e.key === 'ArrowLeft') {
+                                if (isAnimating) return;
+                                goToIndex(getPrevIndex());
+                            } else if (e.key === 'ArrowRight') {
+                                if (isAnimating) return;
+                                goToIndex(getNextIndex());
+                            }
+                        } else {
+                            // Navigation lightbox
+                            if (e.key === 'Escape') {
+                                closeLightboxFunc();
+                            } else if (e.key === 'ArrowLeft') {
+                                lightboxPrev.click();
+                            } else if (e.key === 'ArrowRight') {
+                                lightboxNext.click();
+                            }
+                        }
+                    });
+                    
+                    // Navigation tactile pour les appareils mobiles
+                    let touchStartX = 0;
+                    let touchStartY = 0;
+                    
+                    cardContainer.addEventListener('touchstart', (e) => {
+                        touchStartX = e.touches[0].clientX;
+                        touchStartY = e.touches[0].clientY;
+                    });
+                    
+                    cardContainer.addEventListener('touchend', (e) => {
+                        if (isAnimating) return;
+                        
+                        const touchEndX = e.changedTouches[0].clientX;
+                        const touchEndY = e.changedTouches[0].clientY;
+                        const diffX = touchStartX - touchEndX;
+                        const diffY = touchStartY - touchEndY;
+                        
+                        // S'assurer que le swipe est plus horizontal que vertical
+                        if (Math.abs(diffX) > Math.abs(diffY) && Math.abs(diffX) > 50) {
+                            if (diffX > 0) {
+                                // Glissement vers la gauche
+                                goToIndex(getNextIndex());
+                            } else {
+                                // Glissement vers la droite
+                                goToIndex(getPrevIndex());
+                            }
+                        }
+                    });
+                    
+                    // Navigation tactile pour la lightbox
+                    let lightboxTouchStartX = 0;
+                    let lightboxTouchStartY = 0;
+                    
+                    lightbox.addEventListener('touchstart', (e) => {
+                        lightboxTouchStartX = e.touches[0].clientX;
+                        lightboxTouchStartY = e.touches[0].clientY;
+                    });
+                    
+                    lightbox.addEventListener('touchend', (e) => {
+                        const lightboxTouchEndX = e.changedTouches[0].clientX;
+                        const lightboxTouchEndY = e.changedTouches[0].clientY;
+                        const diffX = lightboxTouchStartX - lightboxTouchEndX;
+                        const diffY = lightboxTouchStartY - lightboxTouchEndY;
+                        
+                        // S'assurer que le swipe est plus horizontal que vertical
+                        if (Math.abs(diffX) > Math.abs(diffY) && Math.abs(diffX) > 50) {
+                            if (diffX > 0) {
+                                // Glissement vers la gauche
+                                lightboxNext.click();
+                            } else {
+                                // Glissement vers la droite
+                                lightboxPrev.click();
+                            }
+                        } else if (Math.abs(diffY) > Math.abs(diffX) && diffY > 100) {
+                            // Swipe vers le haut pour fermer
+                            closeLightboxFunc();
+                        }
+                    });
+                }
+                
+                // Démarrer l'application
+                init();
+            }
+        });
+    </script>
+</body>
+</html>
