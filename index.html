@@ -458,13 +458,13 @@
     <div class="flex-1 flex items-center justify-center h-[65vh] py-8">
         <div class="relative w-full max-w-6xl mx-auto">
             <!-- Boutons de navigation -->
-            <div class="nav-button prev" id="prev-btn">
+            <div class="nav-button prev" id="prev-btn" role="button" aria-label="Image précédente" tabindex="0">
                 <svg xmlns="http://www.w3.org/2000/svg" class="h-8 w-8" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7" />
                 </svg>
             </div>
             
-            <div class="nav-button next" id="next-btn">
+            <div class="nav-button next" id="next-btn" role="button" aria-label="Image suivante" tabindex="0">
                 <svg xmlns="http://www.w3.org/2000/svg" class="h-8 w-8" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7" />
                 </svg>
@@ -483,8 +483,8 @@
     </div>
     
     <!-- Lightbox -->
-    <div class="lightbox" id="lightbox">
-        <div class="close-btn" id="close-lightbox">
+    <div class="lightbox" id="lightbox" role="dialog" aria-modal="true" aria-labelledby="lightbox-img">
+        <div class="close-btn" id="close-lightbox" role="button" aria-label="Fermer le lightbox" tabindex="0">
             <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
                 <path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12" />
             </svg>
@@ -493,13 +493,13 @@
         <div class="lightbox-content">
             <img id="lightbox-img" class="lightbox-img" src="/placeholder.svg" alt="Image agrandie">
             
-            <div class="lightbox-nav prev" id="lightbox-prev">
+            <div class="lightbox-nav prev" id="lightbox-prev" role="button" aria-label="Image précédente dans la lightbox" tabindex="0">
                 <svg xmlns="http://www.w3.org/2000/svg" class="h-8 w-8" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7" />
                 </svg>
             </div>
             
-            <div class="lightbox-nav next" id="lightbox-next">
+            <div class="lightbox-nav next" id="lightbox-next" role="button" aria-label="Image suivante dans la lightbox" tabindex="0">
                 <svg xmlns="http://www.w3.org/2000/svg" class="h-8 w-8" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7" />
                 </svg>
@@ -639,6 +639,9 @@
                         card.className = `card ${getCardClass(index)}`;
                         card.style.width = '300px';
                         card.style.zIndex = index === currentIndex ? 10 : 5;
+                        // Accessibility: Make each card focusable and indicate it is a button
+                        card.setAttribute('role', 'button');
+                        card.setAttribute('tabindex', '0');
                         
                         const img = document.createElement('img');
                         img.src = image.url;
@@ -653,6 +656,13 @@
                                 openLightbox(index);
                             } else {
                                 goToIndex(index);
+                            }
+                        });
+                        // Optionally: allow "Enter" key activation
+                        card.addEventListener('keydown', (e) => {
+                            if (e.key === 'Enter' || e.key === ' ') {
+                                e.preventDefault();
+                                card.click();
                             }
                         });
                         
