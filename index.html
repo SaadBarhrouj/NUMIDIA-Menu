@@ -133,11 +133,7 @@
         }
         
         .dot-indicator {
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            gap: 10px;
-            margin-top: 20px;
+            display: none;
         }
         
         .dot {
@@ -483,7 +479,7 @@
     
     <!-- Compteur -->
     <div class="counter" id="counter">
-        1 / 3
+        1/18
     </div>
     
     <!-- Lightbox -->
@@ -536,16 +532,76 @@
             // Configuration
             const images = [
                 {
-                    url: "https://pfst.cf2.poecdn.net/base/image/ec25c86bd5160297cd43e47eccc69a6571336455672e1b4ef082519329e61122?w=2480&h=3508",
-                    alt: "NUMIDIA Burger Menu"
+                    url: "images/1.jpg",
+                    alt: "NUMIDIA Menu 1"
                 },
                 {
-                    url: "https://pfst.cf2.poecdn.net/base/image/4be323936af6dc23a9a0159f3260dbb070047546c4f29f6318fed4378898c6db?w=2480&h=3508",
-                    alt: "NUMIDIA Coffee Menu"
+                    url: "images/2.jpg",
+                    alt: "NUMIDIA Menu 2"
                 },
                 {
-                    url: "https://pfst.cf2.poecdn.net/base/image/e039422950008e49143bf6160a45bd7fe6f75f51581586b75f8260a4c16e5d8b?w=2480&h=3508",
-                    alt: "NUMIDIA Croquettes Menu"
+                    url: "images/3.jpg",
+                    alt: "NUMIDIA Menu 3"
+                },
+                {
+                    url: "images/4.jpg",
+                    alt: "NUMIDIA Menu 4"
+                },
+                {
+                    url: "images/5.jpg",
+                    alt: "NUMIDIA Menu 5"
+                },
+                {
+                    url: "images/6.jpg",
+                    alt: "NUMIDIA Menu 6"
+                },
+                {
+                    url: "images/7.jpg",
+                    alt: "NUMIDIA Menu 7"
+                },
+                {
+                    url: "images/8.jpg",
+                    alt: "NUMIDIA Menu 8"
+                },
+                {
+                    url: "images/9.jpeg",
+                    alt: "NUMIDIA Menu 9"
+                },
+                {
+                    url: "images/10.jpg",
+                    alt: "NUMIDIA Menu 10"
+                },
+                {
+                    url: "images/11.jpg",
+                    alt: "NUMIDIA Menu 11"
+                },
+                {
+                    url: "images/12.jpg",
+                    alt: "NUMIDIA Menu 12"
+                },
+                {
+                    url: "images/13.jpg",
+                    alt: "NUMIDIA Menu 13"
+                },
+                {
+                    url: "images/14.jpg",
+                    alt: "NUMIDIA Menu 14"
+                },
+                {
+                    url: "images/15.jpg",
+                    alt: "NUMIDIA Menu 15"
+                },
+                {
+                    url: "images/16.jpg",
+                    alt: "NUMIDIA Menu 16"
+                },
+                {
+                    url: "images/17.jpg",
+                    alt: "NUMIDIA Menu 17"
+                },
+                {
+                    url: "images/18.jpg",
+                    alt: "NUMIDIA Menu 18"
                 }
             ];
             
@@ -571,7 +627,7 @@
                 const lightboxPrev = document.getElementById('lightbox-prev');
                 const lightboxNext = document.getElementById('lightbox-next');
                 
-                let currentIndex = 1; // On commence par le café (au milieu)
+                let currentIndex = 0; // On commence par la première image
                 let isAnimating = false; // Pour éviter les clics multiples pendant l'animation
                 
                 // Créer les cartes
@@ -608,18 +664,9 @@
                 
                 // Créer les points indicateurs
                 function createDots() {
+                    // Vider le conteneur de points
                     dotIndicator.innerHTML = '';
-                    
-                    images.forEach((_, index) => {
-                        const dot = document.createElement('div');
-                        dot.className = `dot ${index === currentIndex ? 'active' : ''}`;
-                        dot.addEventListener('click', () => {
-                            if (isAnimating) return;
-                            goToIndex(index);
-                        });
-                        
-                        dotIndicator.appendChild(dot);
-                    });
+                    // Ne pas créer de points du tout
                 }
                 
                 // Déterminer la classe de la carte en fonction de sa position
@@ -671,13 +718,19 @@
                     const dots = document.querySelectorAll('.dot');
                     
                     dots.forEach((dot, index) => {
-                        dot.className = `dot ${index === currentIndex ? 'active' : ''}`;
+                        // Mettre à jour la classe active en fonction de l'index actuel
+                        const isActive = 
+                            (index === 0 && currentIndex >= 0 && currentIndex <= 5) ||
+                            (index === 1 && currentIndex >= 6 && currentIndex <= 11) ||
+                            (index === 2 && currentIndex >= 12 && currentIndex <= 17);
+                        
+                        dot.className = `dot ${isActive ? 'active' : ''}`;
                     });
                 }
                 
                 // Mettre à jour le compteur
                 function updateCounter() {
-                    counter.textContent = `${currentIndex + 1} / ${images.length}`;
+                    counter.textContent = `${currentIndex + 1}/18`;
                 }
                 
                 // Ouvrir la lightbox
